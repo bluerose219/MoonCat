@@ -1,0 +1,297 @@
+<title>Git · Linux 명령어 노트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky search/tab bar, then category sections with a 2-column grid of command cards (1 column on phones) */
+:root {
+  --bg: #f2f4f7;
+  --surface: #ffffff;
+  --fg: #1a2130;
+  --muted: #5a6477;
+  --line: #dbe0e8;
+  --code-bg: #eceff4;
+  --accent: #0d6c8a;
+  --accent-soft: #dcecf2;
+  --git: #c4471f;
+  --linux: #2f6f3a;
+  --danger: #b42318;
+  --danger-soft: #fde8e6;
+  --font-ui: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", Consolas, "D2Coding", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --surface: #191f29; --fg: #e3e7ee; --muted: #97a1b2; --line: #2a3242;
+    --code-bg: #0c1016; --accent: #5cb8d6; --accent-soft: #173342;
+    --git: #f07a52; --linux: #7cc48a; --danger: #f2827a; --danger-soft: #3a1b1a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #191f29; --fg: #e3e7ee; --muted: #97a1b2; --line: #2a3242;
+  --code-bg: #0c1016; --accent: #5cb8d6; --accent-soft: #173342;
+  --git: #f07a52; --linux: #7cc48a; --danger: #f2827a; --danger-soft: #3a1b1a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; }
+
+header.top { padding-block: 32px 8px; }
+header.top h1 { font-size: 1.9rem; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+header.top h1 .sep { color: var(--muted); font-weight: 400; }
+header.top p { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+.me { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.85rem; }
+.me span { font-family: var(--font-code); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); padding-block: 12px; }
+.bar .wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.search { flex: 1 1 260px; min-width: 0; position: relative; }
+.search input { width: 100%; font: inherit; padding: 9px 12px 9px 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; stroke: var(--muted); fill: none; }
+.tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+.tabs button { font: inherit; font-size: 0.9rem; border: 0; background: transparent; color: var(--muted); padding: 5px 14px; border-radius: 6px; cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--accent-soft); color: var(--fg); font-weight: 700; }
+.tabs button:focus-visible { outline: 2px solid var(--accent); }
+.count { font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.toc { display: flex; flex-wrap: wrap; gap: 6px; padding-block: 16px 0; }
+.toc a { font-size: 0.82rem; color: var(--muted); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; background: var(--surface); }
+.toc a:hover, .toc a:focus-visible { color: var(--fg); border-color: var(--accent); }
+.toc a .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+main { padding-block: 8px 48px; }
+section.cat { padding-top: 28px; scroll-margin-top: 80px; }
+section.cat h2 { font-size: 1.15rem; margin: 0 0 4px; display: flex; align-items: baseline; gap: 10px; }
+section.cat h2 .kind { font-family: var(--font-code); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+.kind.git { color: var(--git); } .kind.linux { color: var(--linux); }
+.dot.git { background: var(--git); } .dot.linux { background: var(--linux); }
+section.cat > p { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card.danger { border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
+.card .head { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
+.card code.cmd { font-family: var(--font-code); font-weight: 600; font-size: 0.92rem; overflow-wrap: anywhere; }
+.badge { flex: none; font-size: 0.72rem; font-weight: 700; color: var(--danger); background: var(--danger-soft); border-radius: 4px; padding: 1px 6px; }
+.card .desc { margin: 0; font-size: 0.9rem; }
+.card .note { margin: 0; font-size: 0.82rem; color: var(--muted); }
+
+.ex { position: relative; background: var(--code-bg); border-radius: 7px; border: 1px solid var(--line); }
+.ex pre { margin: 0; padding: 10px 12px; padding-right: 64px; overflow-x: auto; font-family: var(--font-code); font-size: 0.8rem; line-height: 1.55; }
+.ex .c { color: var(--muted); }
+.ex .p { color: var(--accent); user-select: none; }
+.copy { position: absolute; top: 6px; right: 6px; font: inherit; font-size: 0.72rem; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 5px; padding: 2px 8px; cursor: pointer; }
+.copy:hover, .copy:focus-visible { color: var(--fg); border-color: var(--accent); outline: none; }
+
+.empty { padding: 40px 0; color: var(--muted); text-align: center; }
+footer { color: var(--muted); font-size: 0.8rem; padding-block: 0 32px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<header class="top wrap">
+  <h1>Git <span class="sep">·</span> Linux 명령어 노트</h1>
+  <p>자주 쓰는 깃 명령어와 리눅스 터미널 명령어를 예시와 함께 모았습니다. 검색창에 명령어나 설명을 입력하면 바로 걸러지고, 예시 오른쪽 위의 복사 버튼으로 명령을 복사할 수 있습니다.</p>
+  <div class="me"><span>user.name = bluerose219</span><span>git 2.56.0</span></div>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <label class="search" for="q">
+      <svg viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      <input id="q" type="search" placeholder="예: commit, 되돌리기, chmod, 압축" autocomplete="off">
+    </label>
+    <div class="tabs" role="group" aria-label="분류">
+      <button type="button" data-f="all" aria-pressed="true">전체</button>
+      <button type="button" data-f="git" aria-pressed="false">Git</button>
+      <button type="button" data-f="linux" aria-pressed="false">Linux</button>
+    </div>
+    <span class="count" id="count"></span>
+  </div>
+</div>
+
+<div class="wrap">
+  <nav class="toc" id="toc" aria-label="목차"></nav>
+  <main id="main"></main>
+  <footer>⚠ 표시가 붙은 명령은 되돌리기 어렵습니다. 실행 전에 대상 경로와 브랜치를 한 번 더 확인하세요.</footer>
+</div>
+
+<script>
+const DATA = [
+  { kind: "git", id: "git-setup", title: "설정", lead: "처음 한 번만 해두면 되는 사용자 정보와 기본값 설정입니다.", items: [
+    { cmd: "git config --global user.name", desc: "커밋에 기록될 이름을 설정합니다.", ex: ["git config --global user.name \"bluerose219\""] },
+    { cmd: "git config --global user.email", desc: "커밋에 기록될 이메일을 설정합니다. GitHub 계정 이메일과 같게 맞추는 것이 좋습니다.", ex: ["git config --global user.email \"bluerose2198@gmail.com\""] },
+    { cmd: "git config --list", desc: "현재 적용된 설정을 모두 보여줍니다. --show-origin을 붙이면 어느 파일에서 온 설정인지도 나옵니다.", ex: ["git config --list --show-origin", "git config user.name   # 값 하나만 확인"] },
+    { cmd: "git config --global init.defaultBranch", desc: "git init으로 만든 저장소의 기본 브랜치 이름을 정합니다.", ex: ["git config --global init.defaultBranch main"] },
+  ]},
+  { kind: "git", id: "git-start", title: "저장소 만들기", lead: "새 저장소를 만들거나 원격 저장소를 내려받습니다.", items: [
+    { cmd: "git init", desc: "현재 폴더를 깃 저장소로 만듭니다. 숨김 폴더 .git이 생깁니다.", ex: ["cd python_miniproject", "git init"] },
+    { cmd: "git clone <url>", desc: "원격 저장소 전체를 내려받습니다. 뒤에 폴더 이름을 주면 그 이름으로 받습니다.", ex: ["git clone https://github.com/bluerose219/repo.git", "git clone https://github.com/bluerose219/repo.git my-folder"] },
+    { cmd: ".gitignore", desc: "깃이 추적하지 않을 파일 패턴을 적는 파일입니다. 저장소 최상위에 둡니다.", ex: ["# .gitignore 예시", "__pycache__/", "*.pyc", ".venv/", ".env"] },
+  ]},
+  { kind: "git", id: "git-status", title: "상태와 기록 보기", lead: "무엇이 바뀌었는지, 어떤 커밋이 있었는지 확인합니다.", items: [
+    { cmd: "git status", desc: "변경된 파일, 스테이징된 파일, 현재 브랜치를 보여줍니다. -s는 짧은 형식입니다.", ex: ["git status", "git status -s"] },
+    { cmd: "git diff", desc: "아직 스테이징하지 않은 변경 내용을 줄 단위로 보여줍니다.", ex: ["git diff", "git diff --staged   # add 한 내용", "git diff main..feature   # 브랜치 비교"] },
+    { cmd: "git log", desc: "커밋 기록을 보여줍니다. 옵션을 조합하면 한눈에 보기 좋습니다.", ex: ["git log --oneline", "git log --oneline --graph --all", "git log -p app.py   # 파일 하나의 변경 이력"] },
+    { cmd: "git show <커밋>", desc: "특정 커밋의 정보와 변경 내용을 보여줍니다.", ex: ["git show HEAD", "git show a1b2c3d"] },
+    { cmd: "git blame <파일>", desc: "파일의 각 줄을 누가, 어느 커밋에서 바꿨는지 보여줍니다.", ex: ["git blame main.py"] },
+  ]},
+  { kind: "git", id: "git-commit", title: "스테이징과 커밋", lead: "작업 폴더 → 스테이징 영역(add) → 저장소(commit) 순서로 기록됩니다.", items: [
+    { cmd: "git add", desc: "변경 내용을 다음 커밋에 넣을 대상으로 올립니다.", ex: ["git add main.py", "git add .          # 현재 폴더의 모든 변경", "git add -p         # 바뀐 부분을 골라서 추가"] },
+    { cmd: "git commit -m", desc: "스테이징된 내용을 메시지와 함께 커밋합니다.", ex: ["git commit -m \"로그인 기능 추가\"", "git commit -am \"오타 수정\"   # 추적 중인 파일은 add 생략"] },
+    { cmd: "git commit --amend", desc: "마지막 커밋의 메시지나 내용을 고칩니다. 이미 push한 커밋에는 쓰지 않는 것이 안전합니다.", ex: ["git add 빠진파일.py", "git commit --amend --no-edit", "git commit --amend -m \"새 메시지\""] },
+    { cmd: "git restore", desc: "파일을 마지막 커밋 상태로 되돌리거나, 스테이징을 취소합니다.", ex: ["git restore --staged main.py   # add 취소", "git restore main.py            # 수정 내용 버리기"], note: "--staged 없는 restore는 수정 내용을 지웁니다." },
+    { cmd: "git rm", desc: "파일을 삭제하고 그 삭제를 스테이징합니다. --cached는 파일은 두고 추적만 끊습니다.", ex: ["git rm old.py", "git rm --cached .env   # 실수로 올린 파일 추적 해제"] },
+  ]},
+  { kind: "git", id: "git-branch", title: "브랜치", lead: "기능별로 작업을 나누고 합칩니다.", items: [
+    { cmd: "git branch", desc: "브랜치 목록을 봅니다. -a는 원격 브랜치까지 보여줍니다.", ex: ["git branch", "git branch -a"] },
+    { cmd: "git switch", desc: "브랜치를 옮깁니다. -c로 새 브랜치를 만들면서 이동합니다.", ex: ["git switch -c feature/login", "git switch main", "git switch -   # 직전 브랜치로"] },
+    { cmd: "git merge <브랜치>", desc: "다른 브랜치의 변경을 현재 브랜치로 합칩니다.", ex: ["git switch main", "git merge feature/login"] },
+    { cmd: "git rebase <브랜치>", desc: "현재 브랜치의 커밋을 대상 브랜치 끝으로 옮겨 기록을 일직선으로 만듭니다.", ex: ["git switch feature/login", "git rebase main", "git rebase --continue   # 충돌 해결 후", "git rebase --abort      # 취소"] },
+    { cmd: "git branch -d", desc: "병합이 끝난 브랜치를 지웁니다. -D는 병합 여부와 상관없이 지웁니다.", ex: ["git branch -d feature/login", "git push origin --delete feature/login   # 원격 브랜치 삭제"] },
+  ]},
+  { kind: "git", id: "git-remote", title: "원격 저장소", lead: "GitHub 같은 원격 저장소와 주고받습니다.", items: [
+    { cmd: "git remote", desc: "연결된 원격 저장소를 확인하고 추가합니다.", ex: ["git remote -v", "git remote add origin https://github.com/bluerose219/repo.git", "git remote set-url origin <새 주소>"] },
+    { cmd: "git push", desc: "로컬 커밋을 원격으로 올립니다. 처음에는 -u로 추적 브랜치를 연결합니다.", ex: ["git push -u origin main   # 처음 한 번", "git push"] },
+    { cmd: "git pull", desc: "원격의 변경을 받아와 현재 브랜치에 합칩니다 (fetch + merge).", ex: ["git pull", "git pull --rebase   # merge 대신 rebase"] },
+    { cmd: "git fetch", desc: "원격의 변경을 받아오기만 하고 합치지는 않습니다.", ex: ["git fetch origin", "git log --oneline main..origin/main   # 받아온 커밋 보기"] },
+    { cmd: "git push --force-with-lease", desc: "원격 기록을 덮어씁니다. 남이 그 사이 올린 커밋이 있으면 거부되어 --force보다 안전합니다.", ex: ["git push --force-with-lease"], danger: true },
+  ]},
+  { kind: "git", id: "git-undo", title: "되돌리기와 임시 저장", lead: "실수를 고치거나 작업을 잠깐 치워둡니다.", items: [
+    { cmd: "git stash", desc: "커밋하지 않은 변경을 임시로 치워두고 작업 폴더를 깨끗하게 만듭니다.", ex: ["git stash", "git stash list", "git stash pop     # 다시 꺼내기", "git stash -u      # 새 파일까지 포함"] },
+    { cmd: "git reset --soft HEAD~1", desc: "마지막 커밋을 취소하되 변경 내용은 스테이징 상태로 남깁니다.", ex: ["git reset --soft HEAD~1"] },
+    { cmd: "git reset --hard", desc: "지정한 커밋으로 돌아가고 그 이후 변경을 모두 버립니다.", ex: ["git reset --hard HEAD~1", "git reset --hard origin/main   # 원격과 똑같이"], danger: true },
+    { cmd: "git revert <커밋>", desc: "특정 커밋을 되돌리는 새 커밋을 만듭니다. 이미 push한 커밋을 취소할 때 씁니다.", ex: ["git revert a1b2c3d"] },
+    { cmd: "git reflog", desc: "HEAD가 거쳐 간 모든 위치를 보여줍니다. reset으로 잃어버린 커밋을 찾을 때 씁니다.", ex: ["git reflog", "git reset --hard HEAD@{2}"] },
+    { cmd: "git tag", desc: "커밋에 버전 이름을 붙입니다.", ex: ["git tag v1.0.0", "git push origin v1.0.0"] },
+  ]},
+
+  { kind: "linux", id: "lx-nav", title: "위치 이동과 탐색", lead: "지금 어디에 있는지 보고, 폴더를 옮겨 다닙니다.", items: [
+    { cmd: "pwd", desc: "현재 작업 중인 폴더의 전체 경로를 출력합니다.", ex: ["pwd", "# /home/user/project"] },
+    { cmd: "ls", desc: "폴더 안의 파일 목록을 봅니다.", ex: ["ls", "ls -la      # 숨김 파일 포함, 자세히", "ls -lh      # 크기를 KB/MB로", "ls -lt      # 수정 시간순"] },
+    { cmd: "cd", desc: "폴더를 이동합니다.", ex: ["cd project/src", "cd ..       # 상위 폴더", "cd ~        # 홈 폴더", "cd -        # 직전 폴더"] },
+    { cmd: "tree", desc: "폴더 구조를 나무 모양으로 보여줍니다. 설치가 필요할 수 있습니다.", ex: ["tree -L 2   # 2단계 깊이까지", "tree -I \"__pycache__|.venv\""] },
+  ]},
+  { kind: "linux", id: "lx-file", title: "파일과 폴더 다루기", lead: "만들고, 복사하고, 옮기고, 지웁니다.", items: [
+    { cmd: "mkdir", desc: "폴더를 만듭니다. -p는 중간 폴더까지 한 번에 만듭니다.", ex: ["mkdir data", "mkdir -p src/utils/tests"] },
+    { cmd: "touch", desc: "빈 파일을 만들거나, 있는 파일의 수정 시간을 갱신합니다.", ex: ["touch main.py README.md"] },
+    { cmd: "cp", desc: "파일을 복사합니다. 폴더는 -r이 필요합니다.", ex: ["cp main.py main_backup.py", "cp -r src/ src_backup/"] },
+    { cmd: "mv", desc: "파일을 옮기거나 이름을 바꿉니다.", ex: ["mv old.py new.py", "mv *.csv data/"] },
+    { cmd: "rm", desc: "파일을 지웁니다. 휴지통 없이 바로 삭제됩니다.", ex: ["rm temp.txt", "rm -i *.log    # 하나씩 확인하며 삭제", "rm -r build/    # 폴더 삭제"], danger: true, note: "rm -rf 앞에 변수나 * 가 있으면 경로를 꼭 다시 확인하세요." },
+    { cmd: "ln -s", desc: "바로가기(심볼릭 링크)를 만듭니다.", ex: ["ln -s /opt/app/config.yml config.yml"] },
+  ]},
+  { kind: "linux", id: "lx-view", title: "파일 내용 보기", lead: "파일을 열지 않고 터미널에서 내용을 확인합니다.", items: [
+    { cmd: "cat", desc: "파일 내용을 한 번에 출력합니다.", ex: ["cat requirements.txt", "cat -n main.py   # 줄 번호와 함께"] },
+    { cmd: "less", desc: "긴 파일을 페이지 단위로 봅니다. / 로 검색, q 로 종료합니다.", ex: ["less app.log"] },
+    { cmd: "head / tail", desc: "파일의 앞부분이나 뒷부분만 봅니다. tail -f는 새로 쌓이는 로그를 실시간으로 보여줍니다.", ex: ["head -n 20 data.csv", "tail -n 50 app.log", "tail -f app.log   # Ctrl+C로 종료"] },
+    { cmd: "wc", desc: "줄, 단어, 바이트 수를 셉니다.", ex: ["wc -l data.csv", "# 1024 data.csv"] },
+  ]},
+  { kind: "linux", id: "lx-search", title: "검색", lead: "파일 안의 글자나 파일 자체를 찾습니다.", items: [
+    { cmd: "grep", desc: "파일 안에서 문자열을 찾습니다.", ex: ["grep \"import\" main.py", "grep -rn \"TODO\" src/        # 폴더 전체, 줄 번호", "grep -i \"error\" app.log      # 대소문자 무시", "grep -v \"DEBUG\" app.log      # 제외하고 보기"] },
+    { cmd: "find", desc: "조건에 맞는 파일을 찾습니다.", ex: ["find . -name \"*.py\"", "find . -type d -name \"__pycache__\"", "find . -size +100M           # 100MB 넘는 파일", "find . -mtime -1             # 하루 안에 수정된 파일"] },
+    { cmd: "which", desc: "명령어 실행 파일이 어디에 있는지 알려줍니다.", ex: ["which python3", "# /usr/bin/python3"] },
+  ]},
+  { kind: "linux", id: "lx-perm", title: "권한", lead: "읽기(r=4) · 쓰기(w=2) · 실행(x=1) 권한을 소유자 / 그룹 / 기타 순서로 정합니다.", items: [
+    { cmd: "chmod", desc: "파일 권한을 바꿉니다. 숫자는 세 자리(소유자·그룹·기타)의 합입니다.", ex: ["chmod +x run.sh      # 실행 권한 추가", "chmod 755 run.sh     # rwxr-xr-x", "chmod 644 notes.txt  # rw-r--r--"] },
+    { cmd: "chown", desc: "파일의 소유자와 그룹을 바꿉니다.", ex: ["sudo chown user:user app.log", "sudo chown -R user:user project/"] },
+    { cmd: "sudo", desc: "관리자 권한으로 명령을 실행합니다.", ex: ["sudo apt update", "sudo apt install git"] },
+  ]},
+  { kind: "linux", id: "lx-proc", title: "프로세스", lead: "실행 중인 프로그램을 보고 멈춥니다.", items: [
+    { cmd: "ps", desc: "실행 중인 프로세스 목록을 봅니다.", ex: ["ps aux", "ps aux | grep python"] },
+    { cmd: "top / htop", desc: "CPU와 메모리 사용량을 실시간으로 봅니다. q 로 종료합니다.", ex: ["top", "htop"] },
+    { cmd: "kill", desc: "프로세스 번호(PID)로 프로세스를 종료합니다. -9는 강제 종료입니다.", ex: ["kill 12345", "kill -9 12345", "pkill -f \"python app.py\"   # 이름으로 종료"] },
+    { cmd: "& / jobs / fg", desc: "명령을 백그라운드로 돌리고, 다시 앞으로 가져옵니다.", ex: ["python train.py &", "jobs", "fg %1", "nohup python app.py > out.log 2>&1 &   # 터미널을 닫아도 계속"] },
+  ]},
+  { kind: "linux", id: "lx-net", title: "네트워크와 원격 접속", lead: "서버에 접속하고 파일과 데이터를 주고받습니다.", items: [
+    { cmd: "ssh", desc: "원격 서버에 접속합니다.", ex: ["ssh user@192.168.0.10", "ssh -p 2222 user@example.com", "ssh-keygen -t ed25519 -C \"bluerose2198@gmail.com\"   # 키 만들기"] },
+    { cmd: "scp", desc: "SSH로 파일을 복사합니다.", ex: ["scp data.csv user@server:/home/user/", "scp -r user@server:~/logs ./logs"] },
+    { cmd: "curl", desc: "URL로 요청을 보내고 응답을 받습니다.", ex: ["curl https://api.github.com/users/bluerose219", "curl -o file.zip https://example.com/file.zip", "curl -X POST -H \"Content-Type: application/json\" -d '{\"a\":1}' http://localhost:8000/api"] },
+    { cmd: "wget", desc: "파일을 내려받습니다.", ex: ["wget https://example.com/data.csv"] },
+    { cmd: "ping", desc: "상대 서버까지 연결되는지 확인합니다.", ex: ["ping -c 4 google.com"] },
+  ]},
+  { kind: "linux", id: "lx-zip", title: "압축", lead: "여러 파일을 묶고 풉니다.", items: [
+    { cmd: "tar", desc: "c=만들기, x=풀기, z=gzip, v=진행 표시, f=파일 이름.", ex: ["tar -czvf backup.tar.gz project/", "tar -xzvf backup.tar.gz", "tar -xzvf backup.tar.gz -C /tmp/   # 풀 위치 지정"] },
+    { cmd: "zip / unzip", desc: "zip 형식으로 압축하고 풉니다.", ex: ["zip -r project.zip project/", "unzip project.zip -d out/"] },
+  ]},
+  { kind: "linux", id: "lx-sys", title: "시스템 정보와 환경", lead: "디스크, 메모리, 환경 변수를 확인합니다.", items: [
+    { cmd: "df -h", desc: "디스크 전체 사용량을 사람이 읽기 쉬운 단위로 봅니다.", ex: ["df -h"] },
+    { cmd: "du -sh", desc: "폴더 하나가 차지하는 용량을 봅니다.", ex: ["du -sh project/", "du -sh * | sort -h   # 큰 순서로 정렬"] },
+    { cmd: "free -h", desc: "메모리 사용량을 봅니다.", ex: ["free -h"] },
+    { cmd: "echo / export", desc: "환경 변수를 확인하고 설정합니다. export는 현재 터미널에서만 유지됩니다.", ex: ["echo $PATH", "export API_KEY=\"abc123\"", "echo $API_KEY"] },
+    { cmd: "history", desc: "이전에 입력한 명령 목록을 봅니다. !번호 로 다시 실행합니다.", ex: ["history | tail -20", "!42", "# Ctrl+R 로 이전 명령 검색"] },
+  ]},
+  { kind: "linux", id: "lx-pipe", title: "파이프와 리다이렉션", lead: "명령의 출력을 파일로 보내거나 다른 명령으로 넘깁니다.", items: [
+    { cmd: ">  /  >>", desc: "> 는 파일을 덮어쓰고, >> 는 끝에 이어 붙입니다.", ex: ["ls > files.txt", "echo \"done\" >> log.txt", "python app.py 2> error.log   # 에러만 저장"] },
+    { cmd: "|", desc: "앞 명령의 출력을 뒤 명령의 입력으로 넘깁니다.", ex: ["cat app.log | grep ERROR | wc -l", "ps aux | sort -k4 -nr | head -5   # 메모리 많이 쓰는 순"] },
+    { cmd: "&&  /  ||", desc: "&& 는 앞 명령이 성공했을 때만, || 는 실패했을 때만 뒤 명령을 실행합니다.", ex: ["git add . && git commit -m \"update\" && git push", "mkdir out || echo \"이미 있음\""] },
+  ]},
+];
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let filter = "all";
+try { filter = localStorage.getItem("cheat-filter") || "all"; } catch (e) {}
+
+function renderLine(line) {
+  if (line.trim().startsWith("#")) return `<span class="c">${esc(line)}</span>`;
+  const i = line.indexOf("   #");
+  const body = i >= 0 ? esc(line.slice(0, i)) + `<span class="c">${esc(line.slice(i))}</span>` : esc(line);
+  return `<span class="p">$ </span>${body}`;
+}
+function copyText(lines) {
+  return lines.filter((l) => !l.trim().startsWith("#")).map((l) => { const i = l.indexOf("   #"); return (i >= 0 ? l.slice(0, i) : l).trimEnd(); }).join("\n");
+}
+
+function render() {
+  const q = $("#q").value.trim().toLowerCase();
+  let total = 0, html = "", toc = "";
+  DATA.forEach((cat, ci) => {
+    if (filter !== "all" && cat.kind !== filter) return;
+    const items = cat.items.map((it, ii) => ({ it, ii })).filter(({ it }) => !q ||
+      [it.cmd, it.desc, it.note || "", cat.title, ...it.ex].join(" ").toLowerCase().includes(q));
+    if (!items.length) return;
+    total += items.length;
+    toc += `<a href="#${cat.id}"><span class="dot ${cat.kind}"></span>${esc(cat.title)}</a>`;
+    html += `<section class="cat" id="${cat.id}"><h2><span class="kind ${cat.kind}">${cat.kind}</span>${esc(cat.title)}</h2><p>${esc(cat.lead)}</p><div class="grid">` +
+      items.map(({ it, ii }) => `<article class="card${it.danger ? " danger" : ""}">
+        <div class="head"><code class="cmd">${esc(it.cmd)}</code>${it.danger ? '<span class="badge">⚠ 주의</span>' : ""}</div>
+        <p class="desc">${esc(it.desc)}</p>
+        <div class="ex"><pre>${it.ex.map(renderLine).join("\n")}</pre><button type="button" class="copy" data-k="${ci}-${ii}">복사</button></div>
+        ${it.note ? `<p class="note">${esc(it.note)}</p>` : ""}
+      </article>`).join("") + `</div></section>`;
+  });
+  $("#main").innerHTML = html || `<p class="empty">“${esc(q)}”에 맞는 명령어가 없습니다. 다른 단어로 검색해 보세요.</p>`;
+  $("#toc").innerHTML = toc;
+  $("#count").textContent = `${total}개 명령`;
+  document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === filter)));
+}
+
+document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => {
+  filter = b.dataset.f;
+  try { localStorage.setItem("cheat-filter", filter); } catch (e) {}
+  render();
+}));
+$("#q").addEventListener("input", render);
+
+$("#main").addEventListener("click", (e) => {
+  const btn = e.target.closest(".copy");
+  if (!btn) return;
+  const [ci, ii] = btn.dataset.k.split("-").map(Number);
+  const text = copyText(DATA[ci].items[ii].ex);
+  const done = (msg) => { btn.textContent = msg; setTimeout(() => (btn.textContent = "복사"), 1400); };
+  const fallback = () => {
+    const r = document.createRange(); r.selectNodeContents(btn.previousElementSibling);
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r); done("Ctrl+C");
+  };
+  try {
+    navigator.clipboard.writeText(text).then(() => done("복사됨"), fallback);
+  } catch (err) { fallback(); }
+});
+
+render();
+</script>

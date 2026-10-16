@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# PyInstaller build outputs
+build/
+dist/
+
+# Distribution package
+MoonCat_배포/
+MoonCat_배포.zip
+
+# Save data
+saves/*
+!saves/.gitkeep
